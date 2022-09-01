@@ -150,20 +150,20 @@ document.addEventListener('keydown', e => {
 
     if (state==='menu'){
         //apuntadorOpcion=0
-        //Arriba
-        if(e.key ==='ArrowUp'){
-            if(apuntadorOpcion>0){
-                apuntador.y-=100
-                apuntadorOpcion-=1
-            }
-        }
-        //Abajo
-        if(e.key === 'ArrowDown'){
-            if(apuntadorOpcion<1){
-                apuntador.y+=100
-                apuntadorOpcion+=1
-            }
-        }
+        // //Arriba
+        // if(e.key ==='ArrowUp'){
+        //     if(apuntadorOpcion>0){
+        //         apuntador.y-=100
+        //         apuntadorOpcion-=1
+        //     }
+        // }
+        // //Abajo
+        // if(e.key === 'ArrowDown'){
+        //     if(apuntadorOpcion<1){
+        //         apuntador.y+=100
+        //         apuntadorOpcion+=1
+        //     }
+        // }
         //Enter
         if(e.key === 'Enter'){
             if(apuntadorOpcion===0){
@@ -417,13 +417,14 @@ function menu (){
     ctx.fillStyle = 'Black'
     ctx.fillText("Iniciar juego", 430,400)
 
-    ctx.font = '60px Arial';
-    ctx.fillStyle = 'Black'
-    ctx.fillText("Creditos", 470,500)
+    // ctx.font = '60px Arial';
+    // ctx.fillStyle = 'Black'
+    // ctx.fillText("Creditos", 470,500)
 }
 
 function victoria(){
     backgroundMusic.pause()
+    victoryMusic.volume = 0.2
     victoryMusic.play()
     const time = tiempoTrans
     paroContador()
