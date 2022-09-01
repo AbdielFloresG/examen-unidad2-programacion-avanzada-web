@@ -16,12 +16,19 @@ var g =0
 var b =0
 
 var score=0
-var speed = 5
+var speed = 10
+
+
+
 
 var player1 = null
 var player2 = null
 var paredes = []
 var pared = null
+
+
+var apuntadorOpcion = 0
+var apuntador = null
 
 var direccion = 'R'
 var pause = false
@@ -29,6 +36,8 @@ var pause = false
 var car = new Image()
 var apple = new Image()
 var lava = new Image()
+
+var state = null
 
 
 var sound = new Audio()
@@ -66,6 +75,8 @@ const mapa = [
 
 
 
+
+
 const cambiarColor =() =>{
     r = Math.floor(Math.random() * (255-0) + 1)
     g = Math.floor(Math.random() * (255-0) + 1)
@@ -74,23 +85,6 @@ const cambiarColor =() =>{
     ctx.fill()
 }
 
-
-// canvas.addEventListener('click', e => {  
-    
-//     if(figura=='arc'){
-//         ctx.beginPath();
-//         ctx.arc(e.offsetX,e.offsetY,50,0,2*Math.PI);
-//         // ctx.strokeStyle = 'red'
-//         // ctx.stroke();
-//         ctx.fillStyle='rgba('+r+','+g+','+b+',0.5)'
-//         ctx.fill()
-//         ctx.stroke();
-//     }else{
-//         ctx.fillStyle='rgba('+r+','+g+','+b+',0.5)'
-//         ctx.fillRect(e.offsetX,e.offsetY,50,50)
-//     }
-    
-// })
 window.requestAnimationFrame = (function () {
     return window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
@@ -101,25 +95,68 @@ window.requestAnimationFrame = (function () {
 }());
 
 document.addEventListener('keydown', e => {
-    //Arriba
-    if(e.keyCode == 87 || e.keyCode == 38){
-        direccion = 'U'
+
+    if(state==='juego'){
+        //Arriba
+        if(e.key ==='ArrowUp'){
+            direccion = 'U'
+            if (player1.y>0){
+                player1.y-=speed
+            }  
+        }
+        //Abajo
+        if(e.key === 'ArrowDown'){
+            direccion = 'D'
+            if (player1.y<Limits.y-Limits.grid){
+                player1.y+=speed; 
+            }  
+        }
+        //Izq
+        if(e.key === 'ArrowLeft'){
+            direccion = 'L'
+            if (player1.x>0){
+                player1.x-=speed; 
+            }  
+        }
+        //Derecha
+        if(e.key === 'ArrowRight'){
+            direccion = 'R'
+            if (player1.x<Limits.x-Limits.grid){
+                player1.x+=speed; 
+            }  
+        }
+        if(e.keyCode == 32){
+            pause = (!pause)
+        }
     }
-    //Abajo
-    if(e.keyCode == 83 || e.keyCode == 40){
-        direccion = 'D'
+
+
+    if (state==='menu'){
+        //Arriba
+        if(e.key ==='ArrowUp'){
+            if(apuntadorOpcion>0){
+                apuntador.y-=100
+                apuntadorOpcion-=1
+            }
+        }
+        //Abajo
+        if(e.key === 'ArrowDown'){
+            if(apuntadorOpcion<1){
+                apuntador.y+=100
+                apuntadorOpcion+=1
+            }
+        }
+        //Enter
+        if(e.key === 'Enter'){
+            if(apuntadorOpcion===0){
+                state='juego'
+            }else if(apuntadorOpcion===1){
+                
+            }
+        }
+
     }
-    //Izq
-    if(e.keyCode == 65 || e.keyCode == 37){
-        direccion = 'L'
-    }
-    //Derecha
-    if(e.keyCode == 68 || e.keyCode == 39){
-        direccion = 'R'
-    }
-    if(e.keyCode == 32){
-        pause = (!pause)
-    }
+
 })
 
 function crearMapa(){
@@ -142,35 +179,26 @@ function crearMapa(){
                 printX+=40
             }
         })
-
     })
 }
 
 function run(){
+        
+    state = 'menu'
     canvas = document.getElementById('mycanvas')
     ctx = canvas.getContext('2d')
     ctx.font = '20px serif';
-
-
-    
-    player1 = new Cuadro(mainX,mainY,40,40,r,g,b)
+    player1 = new Cuadro(mainX,mainY,30,30,r,g,b)
+    apuntador = new Pointer(400,270,ctx)
     //player2 = new Cuadro((Math.random() * (470-0) + 1),Math.floor(Math.random() * (470-0) + 1),30,30,r,g,b)
-
-
-    crearMapa()
-    // pared = new Obstaculo(70,170)
-    // paredes.push(pared)
-    // paredes[1] = new Cuadro(400,170,30,150,r,g,b)
-    // paredes[2] = new Cuadro(170,70,150,30,r,g,b)
-    // paredes[3] = new Cuadro(170,400,150,30,r,g,b)
-
+    
     car.src = 'assets/car.png'
     apple.src = 'assets/apple.png'
     sound.src = 'assets/siiiu.mp3'
     lava.src = 'assets/lava.jpeg'
 
-    paint()
-
+    crearMapa()
+    loop()
 
 }
 
@@ -179,18 +207,13 @@ function Cuadro(x,y,w,h){
     this.y = y
     this.w = w
     this.h = h
-    let r = Math.floor(Math.random() * (255-0) + 1)
-    let g = Math.floor(Math.random() * (255-0) + 1)
-    let b = Math.floor(Math.random() * (255-0) + 1)
-    
+
     this.pintar = function(ctx){
         ctx.fillStyle= `rgb(${r},${g},${b})`
         //ctx.fillStyle = 'black'
         ctx.fillRect(this.x,this.y,this.w,this.h)
         ctx.strokeRect(this.x,this.y,this.w,this.h)
     }
-
-
     this.intersects = function (target) { 
         if(this.x < target.x + target.w &&
         this.x + this.w > target.x && 
@@ -219,83 +242,80 @@ function Obstaculo(x,y,ctx){
     };
 }
 
-
-
-function paint(){
-    window.requestAnimationFrame(paint)
-    cambiarColor()
-
-    ctx.fillStyle='rgb('+80+','+200+','+80+')'
-    ctx.fillRect(0,0,1200,800)
-
-    // var img = document.getElementById('imagen')
-    
-    ctx.drawImage(car, player1.x,player1.y, 40,40,)
-    //ctx.drawImage(apple, player2.x,player2.y, 30,30,)
-
-
-    //player1.pintar(ctx)
-    //player2.pintar(ctx)
-
-    paredes.map((item)=>{
-        item.pintar(ctx)
-    })
-
-
-    ctx.font = '20px serif';
-    ctx.fillStyle = 'Black'
-    ctx.fillText("score: "+score , 20,40)
-
-
-    if (!pause){
-        update()
-    }else{
-        ctx.fillStyle = 'rgba(200,200,200,0.5)'
-        ctx.fillRect(0,0,500,500)
-        ctx.fillStyle = 'white'
-        ctx.fillText("Pausa", 230,230)
+function Pointer(x,y,ctx){
+    this.x = x
+    this.y = y
+    this.ctx = ctx
+    this.pintar = function(ctx){
+        ctx.fillStyle = 'rgba(200,200,200,0.8)'
+        ctx.fillRect(this.x,this.y,15,15)
     }
 
 
-    // ctx.fillStyle='rgb('+r+','+g+','+b+')'
-    // ctx.fillRect(mainX,mainY,50,50)
+}
+
+function loop(){
+    window.requestAnimationFrame(loop)
+
+    if(state==='menu'){
+        menu()
+    }else{
+        cambiarColor()
+    
+        ctx.fillStyle='rgb('+80+','+200+','+80+')'
+        ctx.fillRect(0,0,1200,800)
+    
+        ctx.drawImage(car, player1.x,player1.y, 30,30,)
+    
+        paredes.map((item)=>{
+            item.pintar(ctx)
+        })
+    
+        if (!pause){
+            update()
+        }else{
+            ctx.fillStyle = 'rgba(200,200,200,0.5)'
+            ctx.fillRect(0,0,500,500)
+            ctx.fillStyle = 'white'
+            ctx.fillText("Pausa", 230,230)
+        }
+
+    }
+}
+
+
+function menu (){
+    ctx.fillStyle='rgb('+80+','+200+','+80+')'
+    ctx.fillRect(0,0,1200,800)
+    ctx.font = '80px Arial';
+    ctx.fillStyle = 'Black'
+    ctx.fillText("Laberinto", 430,100)
+
+    apuntador.pintar(ctx)
+
+    ctx.font = '80px Arial';
+    ctx.fillStyle = 'Black'
+    ctx.fillText("Laberinto", 430,100)
+
+    ctx.font = '60px Arial';
+    ctx.fillStyle = 'Black'
+    ctx.fillText("Iniciar juego", 430,300)
+
+    ctx.font = '60px Arial';
+    ctx.fillStyle = 'Black'
+    ctx.fillText("Creditos", 470,400)
+
+    ctx.font = '60px Arial';
+    ctx.fillStyle = 'Black'
+    ctx.fillText("Cerrar", 495,500)
+
+
 
 
 
 }
 
 function update () {
-
-    if (direccion==='U'){
-        //car.rotate(1)
-        if (player1.y>0){
-
-            player1.y-=speed; 
-        }  
-    }else if (direccion==='D'){
-        if (player1.y<Limits.y-Limits.grid){
-            player1.y+=speed; 
-        }  
-    }else if (direccion=== 'L'){
-        if (player1.x>0){
-            player1.x-=speed; 
-        }  
-    }else if (direccion==='R'){
-        if (player1.x<Limits.x-Limits.grid){
-            player1.x+=speed; 
-        }  
-    }
-    // if(player1.intersects(player2)){
-    //     player2.x=(Math.random() * (500-0) + 1)
-    //     player2.y=(Math.random() * (500-0) + 1)
-    //     score+=5
-    //     sound.play()
-
-    //     //speed+=1
-
-    //     console.log("Se tocaron")
-    // }
-
     paredes.map(item =>{
         if(player1.intersects(item)){   
             if (direccion == 'U' ) {
