@@ -19,6 +19,7 @@ var score=0
 var speed = 10
 var musicPlay = false
 
+var tiempoTrans = 0
 
 
 var player1 = null
@@ -39,6 +40,7 @@ var apple = new Image()
 var lava = new Image()
 var sprite = new Image()
 var flag = new Image()
+var interval = null
 
 var state = null
 
@@ -136,13 +138,18 @@ document.addEventListener('keydown', e => {
             }  
         }
         if(e.keyCode == 32){
-            pause = (!pause)
+            if(pause){
+                pause=!pause
+                replayContador()
+            }else{
+                pause=!pause
+            }
         }
     }
 
 
     if (state==='menu'){
-        apuntadorOpcion=0
+        //apuntadorOpcion=0
         //Arriba
         if(e.key ==='ArrowUp'){
             if(apuntadorOpcion>0){
@@ -336,6 +343,26 @@ function Pointer(x,y,ctx){
 
 }
 
+
+function inicioContador(){
+    tiempoTrans=0
+    interval = setInterval(()=>{
+                    tiempoTrans+=1
+                    document.getElementById('timer').innerHTML = ("Tiempo: "+tiempoTrans)
+                },1000)
+    
+}
+
+function paroContador(){
+    clearTimeout(interval)
+}
+
+function replayContador(){
+    interval = setInterval(()=>{
+        tiempoTrans+=1
+        document.getElementById('timer').innerHTML = ("Tiempo: "+tiempoTrans)
+    },1000)
+}
 function loop(){
     window.requestAnimationFrame(loop)
 
@@ -345,7 +372,7 @@ function loop(){
         menu()
     }else if (state === 'juego'){
         if(!musicPlay){
-            
+            inicioContador()
             backgroundMusic.play()
             musicPlay=true
         }
@@ -364,6 +391,7 @@ function loop(){
         if (!pause){
             update()
         }else{
+            paroContador()
             ctx.fillStyle = 'rgba(200,200,200,0.5)'
             ctx.fillRect(0,0,1200,800)
             ctx.fillStyle = 'white'
@@ -397,6 +425,9 @@ function menu (){
 function victoria(){
     backgroundMusic.pause()
     victoryMusic.play()
+    const time = tiempoTrans
+    paroContador()
+    document.getElementsByTagName('h1')[0].style.display = 'none';
     ctx.fillStyle='rgb('+80+','+200+','+80+')'
     ctx.fillRect(0,0,1200,800)
 
@@ -408,7 +439,7 @@ function victoria(){
 
     ctx.font = '60px Arial';
     ctx.fillStyle = 'Black'
-    ctx.fillText("Tiempo: "+score, 460,300)
+    ctx.fillText("Tiempo: "+time, 460,300)
 
     ctx.font = '60px Arial';
     ctx.fillStyle = 'Black'
@@ -436,7 +467,6 @@ function update () {
         }
     })
     if(player1.intersects(final)){
-        Pointer
         state='victoria'
     }
 
