@@ -1,1 +1,4 @@
-# examen-unidad2-programacion-avanzada-web
+# Juego de laberinto hecho en canvas como examen de la unidad 2
+
+# Abdiel Flores G
+
